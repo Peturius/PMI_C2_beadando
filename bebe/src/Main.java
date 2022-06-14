@@ -1,8 +1,8 @@
+
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -10,6 +10,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+
 
 public class Main {
 
@@ -117,12 +119,25 @@ class Window {
 }
 class Database {
 
+    public enum Currency {
+        EMERALD("true"),RUBY("true"), TOPAZ("false");
+       String i;
+        Currency(String in) {
+
+            this.i = in.toUpperCase();
+        }
+        public String getValue () {
+            return this.i;
+        }
+    }
+
+
     ArrayList<Thing> dataArray = new ArrayList<>();
     public Database() { //TODO ITT LESZ AZ XML CUCCOS
 
         try {
 
-            File inputFile = new File("src/things2.xml");
+            File inputFile = new File("bebe/src/things2.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = null;
             dBuilder = dbFactory.newDocumentBuilder();
@@ -209,6 +224,20 @@ class Database {
         }
     }
 
+    public boolean check (String str) {
+        boolean n = false;
+
+        for (Currency c : Currency.values()) {
+            if (str.toUpperCase().equals(c.toString())) {
+                if (c.getValue().toString().equals("TRUE")) {
+                    n = true;
+                }
+            }
+        }
+        return n;
+    }
+
+
     public void addNewThing(String traderIn, String priceItemIn, String rewardItemIn, Integer priceAmountIn, Integer rewardAmountIn) {
         Thing thing = new Thing();
         boolean vanE = false;
@@ -230,7 +259,15 @@ class Database {
             thing.rewardItem = rewardItemIn;
             thing.tradeId = dataArray.size();
         }
-        dataArray.add(thing);
+        //System.out.println(check(priceItemIn));
+        //System.out.println(check(rewardItemIn));
+
+        boolean x = check(thing.priceItem);
+        boolean y = check(thing.rewardItem);
+
+        if (x ^ y) {
+            dataArray.add(thing);
+        }
     }
 
     public void removeThing(Integer tradeIdIn) {
@@ -245,7 +282,7 @@ class Database {
     }
 
     public void modifyThing (String traderIn, Integer tradeIdIn, String priceItemIn, String rewardItemIn, Integer priceAmountIn, Integer rewardAmountIn) {
-
+        Thing thing = new Thing();
         boolean lehetE = false;
 
         for (int i = 0; i < dataArray.size(); i++) {
@@ -262,7 +299,15 @@ class Database {
                 lehetE = false;
             }
         }
-        if(lehetE) {
+
+        thing.trader = traderIn;
+        thing.tradeId = tradeIdIn;
+        thing.priceAmount = priceAmountIn;
+        thing.priceItem = priceItemIn;
+        thing.rewardAmount = rewardAmountIn;
+        thing.rewardItem = rewardItemIn;
+
+        if (lehetE && (check(thing.priceItem) ^ check(thing.rewardItem))) {
             dataArray.get(tradeIdIn).rewardItem = rewardItemIn;
             dataArray.get(tradeIdIn).rewardAmount = rewardAmountIn;
             dataArray.get(tradeIdIn).priceItem = priceItemIn;
@@ -326,7 +371,7 @@ class Database {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File("src/things2.xml"));
+            StreamResult result = new StreamResult(new File("bebe/src/things2.xml"));
             transformer.transform(source, result);
 
 
